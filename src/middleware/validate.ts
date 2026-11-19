@@ -8,14 +8,14 @@ interface ValidationSchemas {
 }
 
 export const validate = (schemas: ValidationSchemas): RequestHandler => {
-    return (req, _res, next) => {
+    return (req, res, next) => {
         try {
             if (schemas.body) {
                 req.body = schemas.body.parse(req.body);
             }
 
             if (schemas.query) {
-                schemas.query.parse(req.query);
+                res.locals.validatedQuery = schemas.query.parse(req.query);
             }
 
             if (schemas.params) {

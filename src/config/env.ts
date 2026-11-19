@@ -25,6 +25,10 @@ const envSchema = z.object({
         .regex(/[A-Z]/, 'Must contain an uppercase letter')
         .regex(/[a-z]/, 'Must contain a lowercase letter')
         .optional(),
+    IMGBB_API_KEY: z.string().min(1).optional(),
+    STRIPE_SECRET_KEY: z.string().min(1).optional(),
+    STRIPE_WEBHOOK_SECRET: z.string().min(1).optional(),
+    STRIPE_PREMIUM_PRICE_ID: z.string().min(1).optional(),
 });
 
 const result = envSchema.safeParse(process.env);

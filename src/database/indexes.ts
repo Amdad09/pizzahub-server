@@ -45,5 +45,24 @@ export async function createDatabaseIndexes(): Promise<void> {
                 sparse: true,
             },
         ),
+        orders.createIndex(
+            { customerId: 1, menuItemId: 1, deliveryDate: 1 },
+            {
+                name: 'active_customer_item_date_unique_idx',
+                unique: true,
+                partialFilterExpression: {
+                    status: { $in: ['pending', 'accepted'] },
+                },
+            },
+        ),
+        orders.createIndex(
+            { customerId: 1, createdAt: -1 },
+            { name: 'customer_created_idx' },
+        ),
+
+        orders.createIndex(
+            { vendorId: 1, status: 1, createdAt: -1 },
+            { name: 'vendor_status_created_idx' },
+        ),
     ]);
 }

@@ -13,7 +13,10 @@ export const auth = betterAuth({
         client: mongoClient,
     }),
 
-    trustedOrigins: [env.CLIENT_URL],
+    trustedOrigins: [
+        'http://localhost:3000',
+        'https://pizzahub-client-six.vercel.app',
+    ],
 
     emailAndPassword: {
         enabled: true,

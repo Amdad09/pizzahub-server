@@ -8,13 +8,21 @@ export const authenticate: RequestHandler = async (req, _res, next) => {
     try {
         const session = await auth.api.getSession({
             headers: new Headers(
-                Object.entries(req.headers).flatMap(([key, value]) => {
-                    if (value === undefined) return [];
+                Object.entries(req.headers).reduce<[string, string][]>(
+                    (headers, [key, value]) => {
+                        if (value === undefined) return headers;
 
-                    return [
-                        [key, Array.isArray(value) ? value.join(', ') : value],
-                    ];
-                }),
+                        headers.push([
+                            key,
+                            Array.isArray(value)
+                                ? value.join(', ')
+                                : String(value),
+                        ]);
+
+                        return headers;
+                    },
+                    [],
+                ),
             ),
         });
 
