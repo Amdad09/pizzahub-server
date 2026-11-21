@@ -1,4 +1,11 @@
-import { users, menuItems, orders, transactions } from './collections.js';
+import {
+    users,
+    menuItems,
+    orders,
+    transactions,
+    subscriptions,
+    stripeEvents,
+} from './collections.js';
 
 export async function createDatabaseIndexes(): Promise<void> {
     await Promise.all([
@@ -37,14 +44,6 @@ export async function createDatabaseIndexes(): Promise<void> {
             { name: 'vendor_status_created_idx' },
         ),
 
-        transactions.createIndex(
-            { stripeSessionId: 1 },
-            {
-                name: 'stripe_session_unique_idx',
-                unique: true,
-                sparse: true,
-            },
-        ),
         orders.createIndex(
             { customerId: 1, menuItemId: 1, deliveryDate: 1 },
             {
@@ -55,14 +54,52 @@ export async function createDatabaseIndexes(): Promise<void> {
                 },
             },
         ),
-        orders.createIndex(
-            { customerId: 1, createdAt: -1 },
-            { name: 'customer_created_idx' },
+
+        transactions.createIndex(
+            { stripeSessionId: 1 },
+            {
+                name: 'stripe_session_unique_idx',
+                unique: true,
+                sparse: true,
+            },
         ),
 
-        orders.createIndex(
-            { vendorId: 1, status: 1, createdAt: -1 },
-            { name: 'vendor_status_created_idx' },
+        transactions.createIndex(
+            { stripeInvoiceId: 1 },
+            {
+                name: 'stripe_invoice_unique_idx',
+                unique: true,
+                sparse: true,
+            },
+        ),
+
+        subscriptions.createIndex(
+            { vendorId: 1 },
+            {
+                name: 'subscription_vendor_unique_idx',
+                unique: true,
+            },
+        ),
+
+        subscriptions.createIndex(
+            { stripeSubscriptionId: 1 },
+            {
+                name: 'stripe_subscription_unique_idx',
+                unique: true,
+            },
+        ),
+
+        subscriptions.createIndex(
+            { stripeCustomerId: 1 },
+            { name: 'stripe_customer_idx' },
+        ),
+
+        stripeEvents.createIndex(
+            { stripeEventId: 1 },
+            {
+                name: 'stripe_event_unique_idx',
+                unique: true,
+            },
         ),
     ]);
 }

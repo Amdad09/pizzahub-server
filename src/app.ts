@@ -13,6 +13,8 @@ import { globalRateLimit } from './middleware/rate-limit.js';
 import menuRoutes from './modules/menu/menu.routes.js';
 import ordersRoutes from './modules/orders/orders.routes.js';
 import adminRoutes from './modules/admin/admin.routes.js';
+import subscriptionsRoutes from './modules/subscriptions/subscriptions.routes.js';
+import { stripeWebhook } from './modules/subscriptions/subscriptions.webhook.js';
 
 const app = express();
 app.set('trust proxy', 1);
@@ -32,6 +34,11 @@ app.use(requestLogger);
 app.use(globalRateLimit);
 
 app.all('/api/auth/*splat', toNodeHandler(auth));
+app.post(
+    '/api/v1/subscriptions/webhook',
+    express.raw({ type: 'application/json' }),
+    stripeWebhook,
+);
 
 app.use(express.json({ limit: '6mb' }));
 
@@ -42,6 +49,7 @@ app.get('/health', (_req, res) => {
 app.use('/api/v1/menu', menuRoutes);
 app.use('/api/v1/orders', ordersRoutes);
 app.use('/api/v1/admin', adminRoutes);
+app.use('/api/v1/subscriptions', subscriptionsRoutes);
 
 app.use(notFoundHandler);
 app.use(errorHandler);
