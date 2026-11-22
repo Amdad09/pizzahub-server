@@ -82,7 +82,6 @@ async function syncSubscription(subscriptionId: string): Promise<void> {
     const customerId = getSubscriptionId(subscription.customer);
     const vendorIdFromMetadata = subscription.metadata.vendorId;
 
-    // Find vendor using MongoDB _id, Better Auth id, or Stripe customer ID.
     const vendor =
         (vendorIdFromMetadata && ObjectId.isValid(vendorIdFromMetadata)
             ? await users.findOne({

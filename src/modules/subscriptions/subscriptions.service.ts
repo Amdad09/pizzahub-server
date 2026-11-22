@@ -84,10 +84,6 @@ async function getOrCreateStripeCustomer(
             )) {
                 throw error;
             }
-
-            // console.warn(
-            //     '[Stripe] Stored customer not found. Creating a new customer.',
-            // );
         }
     }
 
