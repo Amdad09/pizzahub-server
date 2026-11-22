@@ -28,7 +28,6 @@ async function main(): Promise<void> {
             );
         }
 
-        // Initialize Better Auth only when a new admin is needed.
         const { auth } = await import('../config/auth.js');
 
         await auth.api.signUpEmail({

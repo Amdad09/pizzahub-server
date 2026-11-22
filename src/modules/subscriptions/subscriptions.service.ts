@@ -109,7 +109,6 @@ export const subscriptionsService = {
         const stripe = getStripe();
         const priceId = getStripePriceId();
 
-        // Verify that the configured price exists and is recurring.
         const price = await stripe.prices.retrieve(priceId);
 
         if (!price.active || price.type !== 'recurring') {
