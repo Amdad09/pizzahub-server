@@ -21,11 +21,9 @@ import { blockedGuard } from '../../middleware/blocked-guard.js';
 
 const router = Router();
 
-// Public routes
 router.get('/', validate({ query: menuQuerySchema }), getPublicMenu);
 router.get('/:id', getPublicMenuById);
 
-// Vendor routes
 const vendorRouter = Router();
 
 vendorRouter.use(authenticate, authorize('vendor'), blockedGuard);
