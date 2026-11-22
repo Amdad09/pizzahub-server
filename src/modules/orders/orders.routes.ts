@@ -24,7 +24,6 @@ import { validate } from '../../middleware/validate.js';
 
 const router = Router();
 
-// Customer routes
 router.post(
     '/',
     authenticate,
@@ -60,7 +59,6 @@ router.patch(
     cancelOrder,
 );
 
-// Vendor routes
 router.get(
     '/vendor',
     authenticate,

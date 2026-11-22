@@ -28,7 +28,6 @@ export const createCheckoutSession: RequestHandler = async (req, res, next) => {
             message: 'Checkout session created successfully.',
         });
     } catch (error) {
-        // console.error('[CREATE CHECKOUT SESSION ERROR]', error);
 
         return next(error);
     }
