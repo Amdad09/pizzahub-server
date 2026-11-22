@@ -8,6 +8,7 @@ import { validate } from '../../middleware/validate.js';
 import {
     blockAdminUserController,
     getAdminOverviewController,
+    getAdminTransactionsController,
     getAdminUserByIdController,
     getAdminUsersController,
     unblockAdminUserController,
@@ -24,7 +25,8 @@ import {
     adminMenuListSchema,
     rejectMenuSchema,
     adminUserParamsSchema,
-    adminUserListSchema
+    adminUserListSchema,
+    adminTransactionListSchema
 } from './admin.schema.js';
 
 const router = Router();
@@ -67,6 +69,12 @@ router.get(
     '/menu/:id',
     validate({ params: adminUserParamsSchema }),
     getAdminMenuItemController,
+);
+
+router.get(
+    '/transactions',
+    validate({ query: adminTransactionListSchema }),
+    getAdminTransactionsController,
 );
 
 router.patch(

@@ -7,7 +7,7 @@ import {
     users,
 } from '../../database/collections.js';
 import { AppError } from '../../shared/errors/app-error.js';
-import type { AdminMenuListQuery, AdminUserListQuery } from './admin.schema.js';
+import type { AdminMenuListQuery, AdminTransactionListQuery, AdminUserListQuery } from './admin.schema.js';
 
 export async function getAdminOverview() {
     const [
@@ -384,4 +384,130 @@ export async function rejectAdminMenuItem(id: string, reason: string) {
     }
 
     return result;
+}
+
+export async function getAdminTransactions(query: AdminTransactionListQuery) {
+    const { q, page, limit } = query;
+
+    const filter: Record<string, unknown> = {};
+
+    if (q) {
+        const search = new RegExp(escapeRegex(q), 'i');
+
+        const matchingVendors = await users
+            .find({
+                role: 'vendor',
+                $or: [
+                    { name: search },
+                    { email: search },
+                    { businessName: search },
+                ],
+            })
+            .project({ _id: 1, id: 1 })
+            .toArray();
+
+        const vendorIds = matchingVendors.flatMap((vendor) => [
+            String(vendor._id),
+            ...(typeof vendor.id === 'string' ? [vendor.id] : []),
+        ]);
+
+        filter.$or = [
+            { vendorId: search },
+            { stripeInvoiceId: search },
+            { stripePaymentIntentId: search },
+            { stripeSubscriptionId: search },
+            { stripeSessionId: search },
+            { vendorId: { $in: vendorIds } },
+        ];
+    }
+
+    const skip = (page - 1) * limit;
+
+    const [documents, total] = await Promise.all([
+        transactions
+            .find(filter)
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit)
+            .toArray(),
+
+        transactions.countDocuments(filter),
+    ]);
+
+    const vendorIds = [...new Set(documents.map((item) => item.vendorId))];
+
+    const vendorObjectIds = vendorIds
+        .filter((id) => ObjectId.isValid(id))
+        .map((id) => new ObjectId(id));
+
+    const vendors = vendorIds.length
+        ? await users
+              .find({
+                  role: 'vendor',
+                  $or: [
+                      { id: { $in: vendorIds } },
+                      { _id: { $in: vendorObjectIds } },
+                  ],
+              })
+              .project({
+                  _id: 1,
+                  id: 1,
+                  name: 1,
+                  email: 1,
+                  businessName: 1,
+              })
+              .toArray()
+        : [];
+
+    const vendorMap = new Map<string, (typeof vendors)[number]>();
+
+    for (const vendor of vendors) {
+        const vendorId = String(vendor.id ?? vendor._id);
+        vendorMap.set(vendorId, vendor);
+
+        if (vendor._id) {
+            vendorMap.set(String(vendor._id), vendor);
+        }
+
+        if (typeof vendor.id === 'string') {
+            vendorMap.set(vendor.id, vendor);
+        }
+    }
+
+    const items = documents.map((transaction) => {
+        const vendor = vendorMap.get(transaction.vendorId);
+
+        return {
+            id: String(transaction._id),
+            vendor: vendor
+                ? {
+                      id: String(vendor.id ?? vendor._id),
+                      name: String(vendor.name ?? ''),
+                      email: String(vendor.email ?? ''),
+                      businessName:
+                          typeof vendor.businessName === 'string'
+                              ? vendor.businessName
+                              : null,
+                  }
+                : null,
+            stripeInvoiceId: transaction.stripeInvoiceId ?? null,
+            stripePaymentIntentId: transaction.stripePaymentIntentId ?? null,
+            stripeSubscriptionId: transaction.stripeSubscriptionId ?? null,
+            amount: transaction.amount,
+            currency: transaction.currency,
+            status: transaction.status,
+            createdAt: transaction.createdAt,
+            updatedAt: transaction.updatedAt,
+        };
+    });
+
+    return {
+        items,
+        pagination: {
+            page,
+            limit,
+            total,
+            totalPages: Math.ceil(total / limit),
+        },
+    };
 }

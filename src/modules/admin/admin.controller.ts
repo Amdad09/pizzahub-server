@@ -10,8 +10,9 @@ import {
     getAdminMenuItemById,
     getAdminMenuItems,
     unblockAdminUser,
+    getAdminTransactions,
 } from './admin.service.js';
-import type { AdminMenuListQuery, AdminUserListQuery } from './admin.schema.js';
+import type { AdminMenuListQuery, AdminUserListQuery, AdminTransactionListQuery } from './admin.schema.js';
 import { sendSuccess } from '../../shared/http/api-response.js';
 import { AppError } from '../../shared/errors/app-error.js';
 
@@ -123,5 +124,17 @@ export const rejectAdminMenuItemController: RequestHandler = async (
 
     return sendSuccess(res, item, {
         message: 'Menu item rejected successfully.',
+    });
+};
+
+export const getAdminTransactionsController: RequestHandler = async (
+    _req,
+    res,
+) => {
+    const query = res.locals.validatedQuery as AdminTransactionListQuery;
+    const result = await getAdminTransactions(query);
+
+    return sendSuccess(res, result, {
+        message: 'Transactions retrieved successfully.',
     });
 };
