@@ -36,8 +36,6 @@ async function getVendorContext(vendorId: string): Promise<VendorContext> {
     const vendor = await users.findOne({
         $or: filters,
     });
-    // const vendor = await users.findOne({ id: vendorId });
-
     if (!vendor || vendor.role !== 'vendor' || vendor.isBlocked) {
         throw new AppError('Vendor account not found or unavailable.', {
             statusCode: 403,
