@@ -12,6 +12,5 @@ export const menuItems = db.collection('menuItems');
 export const orders = db.collection<Order>('orders');
 export const transactions =
     db.collection<SubscriptionTransaction>('transactions');
-// export const transactions = db.collection('transactions');
 export const subscriptions = db.collection<Subscription>('subscriptions');
 export const stripeEvents = db.collection<StripeEventRecord>('stripeEvents');
